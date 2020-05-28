@@ -18,3 +18,7 @@ Simple , just run ./example/text_detect/train.py test. Result is shown.
 ## reference
 > [EAST: An Efficient and Accurate Scene Text Detector](https://arxiv.org/abs/1704.03155v2)<br/>
 > [TextMountain: Accurate Scene Text Detection via Instance Segmentation](https://arxiv.org/abs/1811.12786)
+> [Fully Convolutional Networks for Semantic Segmentation](https://arxiv.org/abs/1411.4038)
+> [SegNet: A Deep ConvolutionalEncoder-Decoder Architecture for SceneSegmentation](http://mi.eng.cam.ac.uk/~cipolla/archive/Publications/inproceedings/2016-PAMI-SegNet.pdf)
+> [U-Net: Convolutional Networks for Biomedical Image Segmentation](https://link.springer.com/chapter/10.1007/978-3-319-24574-4_28?utm_medium=affiliate&utm_source=commission_junction_authors&utm_campaign=3_nsn6445_deeplink_PID5835937&utm_content=deeplink)
+
