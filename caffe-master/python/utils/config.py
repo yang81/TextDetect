@@ -32,11 +32,11 @@ class Config():
 
 		#character set used to draw text on image, we use part of characters in gb2312 character set  
 		self.chs_labels = 'examples/text_detect/char_set/words.txt'
-		self.eng_labels = 'examples/text_detect/char_set//lexicon.txt'
+		self.eng_labels = 'examples/text_detect/char_set/lexicon.txt'
 
 		#train init config
 		self.solver_file = 'models/vgg_ht_mask/solver.proto'
-		self.copy_weight = 'models/vgg_ht_mask/vgg_ht_mask_iter_40000.caffemodel'
+		self.copy_weight = ''
 		self.restore_state = 'models/vgg_ht_mask/vgg_ht_mask_iter_40000.solverstate'
 		self.niter = 100000
 
