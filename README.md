@@ -14,6 +14,8 @@ Before training, you should get some pictures that does not have any text on it.
 
 ## test 
 Simple , just run ./example/text_detect/train.py test. Result is shown.
+> [A trained model is available ] (https://pan.baidu.com/s/1nbs_j5faDYErrsAyWstCRQ)<br/>
+> get code: s8cr<br/>
 
 ## reference
 > [EAST: An Efficient and Accurate Scene Text Detector](https://arxiv.org/abs/1704.03155v2)<br/>
