@@ -1,6 +1,6 @@
 # TextDetect
 
-First, you can generate samples by youself , depending on what background you want. It means you can train a better model facing your target. Second, it's an algorithm like EAST and TextMountain.
+First, you can generate samples by youself , depending on what background you want. It means you can train a better model facing your target. Second, it's an algorithm like EAST and TextMountain. Of course, we have make some changes, make it can predict long text line and picture at arbitrary aspect ratio, means it's a full convolution network.
 
 ## caffe environment
 
