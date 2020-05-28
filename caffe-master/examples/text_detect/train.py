@@ -112,9 +112,15 @@ class Module():
 
 if __name__ == '__main__':
 	module = Module()
-	#module.createDB()
-	module.train(True)
-	#module.test()
+
+	if sys.argv[1] == "db":
+		module.createDB()
+	elif sys.argv[1] == "train":
+		module.train()
+	elif sys.argv[1] == "test":
+		module.test()
+	else:
+		print "unknow"
 	
 
 
