@@ -42,7 +42,7 @@ class Config():
 
 		#test init config
 		self.model = 'models/vgg_ht_mask/test.proto'
-		self.weights = 'models/vgg_ht_mask/vgg_ht_mask_iter_40000.caffemodel'
+		self.weights = 'models/vgg_ht_mask/vgg_ht_mask.caffemodel'
 		self.image = 'examples/text_detect/test_image/test.png'
 
 	def __del__(self):
