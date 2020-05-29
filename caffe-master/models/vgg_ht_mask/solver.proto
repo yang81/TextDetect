@@ -1,0 +1,22 @@
+train_net: "models/vgg_ht_mask/train_test.proto"
+
+base_lr: 0.001
+lr_policy: "poly"
+power: 0.9
+
+
+type: "SGD"
+momentum: 0.9
+
+max_iter: 100000
+
+display: 100
+average_loss: 10
+
+weight_decay: 0.0005
+
+snapshot: 10000
+snapshot_prefix: "models/vgg_ht_mask/vgg_ht_mask"
+iter_size: 32
+
+
