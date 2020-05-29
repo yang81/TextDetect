@@ -4,9 +4,13 @@ First, you can generate samples by youself , depending on what background you wa
 
 ## caffe environment
 
-Of course, before you trainning, you should do something. For the fact that we use caffe framework, you should compile it before anything. Note that, we use caffe's python interface, so a python environment is needed. So far, python2.7 is tested. If you have a different position where python located, change it in the Makefile.config, you know it.Command line is like this :
+Of course, before you trainning, you should do something. For the fact that we use caffe framework, you should compile it before anything. Note that, we use caffe's python interface, so a python environment is required. So far, python2.7 is tested. If you have a different position where python located, change it in the Makefile.config, you know it.Command line is like this :
 > make all -j8<br>
 > make pycaffe<br>
+
+## about layers
+
+We add new python layer OnlineDataLayer for net input, FinalLayer for final result. OnlineEastTargetLayer is designed for label, has a gpu implement. IOULossLayer is for iou loss, also has a gpu implement. And we modeify the SigmoidCrossEntropyLossLayer make it a balanced cross entropy loss. For the full convolution network purpose , UnpoolingLayer is modified.
 
 ## train
 
