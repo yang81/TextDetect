@@ -111,11 +111,9 @@ void UnpoolingLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
   const Dtype* bottom_data = bottom[0]->cpu_data();
   Dtype* top_data = top[0]->mutable_cpu_data();
   const int top_count = top[0]->count();
-  // We'll get the mask from bottom[1] if it's of size >1.
-  //const bool use_bottom_mask = bottom.size() > 1;
 
-	//unpooled width and height is computed by bottom[2] shape
-	const bool use_bottom_mask = bottom.size() == 2;
+  // We'll get the mask from bottom[2] if it's of size >2.
+	const bool use_bottom_mask = bottom.size() > 2;
 	
   const Dtype* bottom_mask = NULL;
   // Different unpooling methods. We explicitly do the switch outside the for
@@ -127,7 +125,7 @@ void UnpoolingLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
     
     // Initialize
     if (use_bottom_mask) {
-      bottom_mask = bottom[1]->cpu_data();
+      bottom_mask = bottom[2]->cpu_data();
     }
     // The main loop
     for (int n = 0; n < bottom[0]->num(); ++n) {
@@ -150,7 +148,7 @@ void UnpoolingLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
         bottom_data += bottom[0]->offset(0, 1);
         top_data += top[0]->offset(0, 1);
         if (use_bottom_mask) {
-          bottom_mask += bottom[1]->offset(0, 1);
+          bottom_mask += bottom[2]->offset(0, 1);
         }
       }
     }
