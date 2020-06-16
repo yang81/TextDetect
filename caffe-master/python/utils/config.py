@@ -45,6 +45,24 @@ class Config():
 		self.weights = 'models/vgg_ht_mask/vgg_ht_mask.caffemodel'
 		self.image = 'examples/text_detect/test_image/test.png'
 
+		#recognise
+		self.recognise_solver_type = 'Adam'
+		self.recognise_solver_file = 'models/vgg_recognise/solver.proto'
+		self.recognise_copy_weight = ''
+		self.recognise_restore_state = ''
+		self.recognise_niter = 100000
+
+		self.recognise_label_len = 10
+		self.recognise_img_width = 320
+		self.recognise_img_height = 32
+		self.recognise_batch = 64
+		self.recognise_gray = True
+
+
+		self.recognise_model = 'models/vgg_recognise/test.proto'
+		self.recognise_weights = 'models/vgg_recognise/vgg_recognise.caffemodel'
+		self.recognise_image = 'examples/text_recognise/test_image/test1.png'
+
 	def __del__(self):
 		pass
 

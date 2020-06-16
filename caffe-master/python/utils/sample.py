@@ -8,8 +8,14 @@ import math
 import collections
 from PIL import Image, ImageDraw, ImageFont
 from utils.font import FontObj
+from utils.color import Color
 import skimage.util
 import numpy as np
+import cv2
+import matplotlib.pyplot as plt
+import sys
+import time
+
 
 class WordList():
 	def __init__(self, config):
@@ -29,6 +35,26 @@ class WordList():
 		for i in range(len(self.eng)):
 			self.eng[i] = self.eng[i].replace('\n', '')
 		'''
+
+	def get(self, index):
+		char = ''
+
+		if index <= 0 :
+			pass
+		else:
+			char = self.chs[index]
+
+		return char
+
+	def get_array(self, arr):
+		char = ''
+		for e in arr:
+			if e <= 0 :
+				continue
+			char += self.chs[e]
+
+		return char
+		
 
 class Generator():
 	def __init__(self, word_list):
@@ -84,6 +110,9 @@ class Generator():
 
 	def traverseWordList(self, chs, count):
 		word_list = []
+		txt_slice = []
+		k = []
+
 		if chs == True:
 			word_list = self.words.chs
 		else:
@@ -93,22 +122,35 @@ class Generator():
 		list_len = len(word_list)
 
 
-		if self.pos == list_len:
-			self.pos = 1
-
 		start = self.pos
 		end = start + count
-		
 
-		if end > list_len:
-			end = list_len
+		if start < list_len and end <= list_len:
+			#normal
+			txt_slice = word_list[start:end]
+			self.traverse_labels = range(start, end)
+			k = range(start, end)
+		elif start >= list_len:
+			#case 1
+			start = start % list_len + 1
+			end = end % list_len + 1
+			txt_slice = word_list[start:end]
+			self.traverse_labels = range(start, end)
+			k = range(start, end)
+		elif start < list_len and end > list_len:
+			#case 2
+			end = end % list_len + 1
+			txt_slice = word_list[start:list_len] + word_list[1:end]
+			a = range(start, list_len)
+			b = range(1, end)
+			self.traverse_labels = a + b
+			k = a + b
+		else:
+			print 'unknow case'
 
-		self.pre_pos.append(self.pos)
-
+		self.pre_pos.append(start)
 		self.pos = end
-
-		txt_slice = word_list[start:end]
-		self.traverse_labels = range(start, end)
+		
 		for e in txt_slice:
 			if chs == True:
 				self.traverse_txt += e
@@ -116,7 +158,6 @@ class Generator():
 				self.traverse_txt += e
 				self.traverse_txt += ' '
 
-		k = range(start, end)
 		v = txt_slice
 
 		self.dic.append(collections.OrderedDict(zip(k, v)))
@@ -147,6 +188,92 @@ class Generator():
 		self.dic = []
 
 
+class RecogniseSample():
+	def __init__(self, config, generator):
+		self.config = config
+		self.generator = generator
+		self.color = Color()
+
+	def getSample(self):
+		#get text from label set
+		text = ""
+		label = []
+		blank_count = random.randint(0,5)
+		
+		if random.choice([True, False]):
+			text = self.generator.traverseWordList(True, self.config.recognise_label_len - blank_count)
+			self.generator.clearDict()
+			self.generator.clearPrePos()
+			label = self.generator.traverse_labels
+		else:
+			text = self.generator.getRandomTxt(True, self.config.recognise_label_len - blank_count)
+			label = self.generator.rand_labels
+
+		for i in range(blank_count):
+			l_pos = random.randint(0, len(label) - 1)
+			t_pos = random.randint(0, len(label) - 1)
+
+			label.insert(l_pos, 0)
+			t = text.decode("utf-8")
+			t = t[0:t_pos] + ' ' +  t[t_pos:]
+			text = t.encode("utf-8")
+
+		#get font
+		font = FontObj(self.config)
+
+		t_w, t_h = font.font.getsize(text.decode('utf-8'))
+		text_color = self.color.textColor()
+		back_color = self.color.distanceRandomColor(text_color, self.config.color_distance)
+
+		img = Image.new("RGB", (t_w, t_h), back_color)
+
+		draw = ImageDraw.Draw(img)
+		draw.text((0, 0), text.decode('utf-8'), font = font.font, fill=text_color)
+
+		alpha = random.uniform(0, math.pi/16.)
+		sign = math.pow(-1, random.randint(1,2))
+
+		w = int(t_w + t_h*math.tan(alpha))
+		h = t_h
+		t = t_h*math.tan(alpha) if sign < 0 else 0
+
+		M = np.array([[1, sign*math.tan(alpha), t],
+					[0, 1, 0]], np.float32)
+
+		img = np.asarray(img)
+
+		img = cv2.warpAffine(img,M,(w,h), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=back_color)
+
+		img = cv2.resize(img, (self.config.recognise_img_width, self.config.recognise_img_height), interpolation=cv2.INTER_LINEAR)
+
+		kernel = np.ones((2,2), np.uint8)
+
+		if random.choice([True, False]):
+			img = cv2.erode(img, kernel, 1)
+		
+		if random.choice([True, False]):
+			img = cv2.dilate(img, kernel, 1)
+
+		if random.choice([True, False]):
+			img = cv2.GaussianBlur(img, (3,3), 1)
+
+		if self.config.recognise_gray:
+			img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+		#im_ = Image.fromarray(img)
+		#im_.show()
+		#im_.save(self.config.image_path + "img_" +  str(random.randint(0,100)) + ".png")
+
+		img = img.astype('float32')
+		img /= 255
+
+		if self.config.recognise_gray:
+			return (img,np.array(label, dtype=np.float32))
+		else:
+			return (img.transpose((2,0,1)),np.array(label, dtype=np.float32))
+
+
+
 class ImageSample():
 	def __init__(self, config, generator, img):
 		self.config = config
@@ -172,6 +299,8 @@ class ImageSample():
 		self.block_fonts = []
 		self.block_heights = []
 
+		self.color = Color()
+
 
 		self.patch_info = {'patch_w_half':0., 'patch_off_x':0., 'patch_off_y':0.}
 
@@ -182,16 +311,10 @@ class ImageSample():
 		self.image_type = 1 if self.image == None else 2
 		
 		if self.image_type == 1:
-			self.block_back_color = self.__randomColor()
+			self.block_back_color = self.color.randomColor()
 			self.image = Image.new("RGB", (512, 512), self.block_back_color)
 
 		return self.image
-
-	def __randomColor(self):
-		R = random.randint(0,255)
-		G = random.randint(0,255)
-		B = random.randint(0,255)
-		return (R,G,B)
 
 	def __getColor(self):
 			idx = random.randint(0,2)
@@ -204,7 +327,7 @@ class ImageSample():
 			elif idx == 1:
 				return (255-c1,255-c2,255-c3)
 			else:
-				return self.__randomColor()
+				return self.color.randomColor()
 
 	def __equalColor(self, c1, c2):
 		if (c1[0] == c2[0]) and (c1[1] == c2[1]) and (c1[2] == c2[2]):
@@ -410,7 +533,7 @@ class ImageSample():
 		#line noise have bad influence on some character or word (Chinese word '一')
 		'''
 		for line_count in range(random.randint(3,8)):
-			line_color = self.__randomColor()
+			line_color = self.color.randomColor()
 			line_width = random.randint(1, 5)
 			x1 = random.randint(0, self.image.width)
 			y1 = random.randint(0, self.image.height)
@@ -425,8 +548,8 @@ class ImageSample():
 		x2 = random.randint(0, self.image.width)
 		y2 = random.randint(0, self.image.height)
 
-		g_color = self.__randomColor()
-		g_fill_color = self.__randomColor()
+		g_color = self.color.randomColor()
+		g_fill_color = self.color.randomColor()
 		g_width = random.randint(1, 5)
 		b_fill = random.randint(0,1)
 		g_shape = random.randint(0,2)

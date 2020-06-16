@@ -17,7 +17,7 @@ from multiprocessing import Process, Queue
 import signal
 from utils.config import Config
 from utils.font import FontObj
-from utils.sample import WordList, Generator, ImageSample
+from utils.sample import WordList, Generator, ImageSample, RecogniseSample
 import caffe
 
 
@@ -371,8 +371,41 @@ class TestDataLayer(caffe.Layer):
 		pass
 
 
+class OnlineRecogniseDataLayer(caffe.Layer):
+	def setup(self, bottom, top):
+		print "OnlineRecogniseDataLayer, setup"
+
+		self.config = Config()
+		self.word_list = WordList(self.config)
+		self.generator = Generator(self.word_list)
+
+		self.batch = self.config.recognise_batch
+		self.height = self.config.recognise_img_height
+		self.width = self.config.recognise_img_width
+		self.channel = 1 if self.config.recognise_gray else 3
+
+	def reshape(self, bottom, top):
+		top[0].reshape(self.batch, self.channel, self.height, self.width)
+		top[1].reshape(self.batch, self.config.recognise_label_len)
+
+	def forward(self, bottom, top):
+
+		data = np.empty((self.batch, self.channel, self.height, self.width), dtype=np.float32)
+		label = np.empty((self.batch, self.config.recognise_label_len), dtype=np.float32)
+
+		for i in range(self.batch):
+			s = RecogniseSample(self.config, self.generator)
+			(d, l) = s.getSample()
+			data[i] = d
+			label[i] = l
 
 
+		top[0].data[...] = data
+		top[1].data[...] = label
+
+	def backward(self, top, propagate_down, bottom):
+		pass
+		
 
 if __name__ == '__main__':
 	config = Config()

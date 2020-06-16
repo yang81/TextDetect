@@ -1,0 +1,34 @@
+train_net: "models/vgg_recognise/train_test.proto"
+test_net: "models/vgg_recognise/train_test.proto"
+
+
+base_lr: 0.0005
+lr_policy: "poly"
+power: 0.9
+
+type: "Adam"
+momentum: 0.9
+momentum2: 0.999
+
+max_iter: 100000
+weight_decay: 0.0002
+
+
+display: 100
+average_loss: 10
+
+snapshot: 10000
+snapshot_prefix: "models/vgg_recognise/vgg_recognise"
+iter_size: 1
+
+test_iter: 100
+test_interval: 1000
+test_initialization: false
+
+
+
+
+
+
+
+

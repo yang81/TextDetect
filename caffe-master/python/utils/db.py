@@ -9,6 +9,8 @@ from PIL import Image
 from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 from utils.config import Config
+import numpy as np
+from utils.sample import RecogniseSample, Generator, WordList
 
 class CreateLMDB():
 	def __init__(self):
@@ -113,6 +115,41 @@ class CreateLMDB():
 
 		print 'done, total ', self.count, ' images'
 
+	def recognise(self):
+		self.word_list = WordList(self.config)
+		self.generator = Generator(self.word_list)
+
+		self.env = lmdb.open(self.config.recognise_db_path, map_size=self.map_size)
+		self.txn = self.env.begin(write = True)
+
+		a = np.array([1,2,3,4,5,6], dtype=np.int32)
+
+		while self.config.recognise_db_count > 0: 
+			s = RecogniseSample(self.config, self.generator)
+			(img,label) = s.getSample()
+
+			self.txn.put(key = str(self.count), value = img.tobytes())
+			self.config.recognise_db_count -= 1
+			self.count += 1
+			self.__commintCheck()
+
+		self.txn.commit()
+		
+		self.env.close()
+
+	def recognise_read(self):
+		env = lmdb.open(self.config.recognise_db_path)
+		imgs = env.begin()
+
+		for i in range(5):
+			v = imgs.get(str(i))
+			img = Image.frombytes("RGB", (320,32), v)
+			img.show()
+
+		env.close()
+		#a = np.frombuffer(v, dtype=np.int32)
+		#print a
+		
 
 	def read(self, i):
 		env = lmdb.open(self.config.db_path)
